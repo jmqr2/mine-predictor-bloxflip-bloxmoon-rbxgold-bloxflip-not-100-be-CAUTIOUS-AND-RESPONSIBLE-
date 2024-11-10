@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mines Game Predictor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+        <div class="main-content">
+            <!-- Grid of mines -->
+            <div class="grid-container" id="mine-grid"></div>
+
+            <!-- Control selectors for mines and predictions -->
+            <div class="controls">
+                <label for="mines-select">Select Number of Mines: </label>
+                <select id="mines-select">
+                    <option value="1">1 Mine</option>
+                    <option value="2">2 Mines</option>
+                    <option value="3">3 Mines</option>
+                    <option value="4">4 Mines</option>
+                    <option value="5">5 Mines</option>
+                    <option value="6">6 Mines</option>
+                    <option value="7">7 Mines</option>
+                    <option value="8">8 Mines</option>
+                    <option value="9">9 Mines</option>
+                    <option value="10">10 Mines</option>
+                    <option value="11">11 Mines</option>
+                    <option value="12">12 Mines</option>
+                    <option value="13">13 Mines</option>
+                    <option value="14">14 Mines</option>
+                    <option value="15">15 Mines</option>
+                    <option value="16">16 Mines</option>
+                    <option value="17">17 Mines</option>
+                    <option value="18">18 Mines</option>
+                    <option value="19">19 Mines</option>
+                    <option value="20">20 Mines</option>
+                    <option value="21">21 Mines</option>
+                    <option value="22">22 Mines</option>
+                    <option value="23">23 Mines</option>
+                    <option value="24">24 Mines</option>
+                    <option value="25">25 Mines</option>
+                </select>
+            </div>
+
+            <div class="controls">
+                <label for="predictions-select">Select Number of Predictions: </label>
+                <select id="predictions-select">
+                    <option value="1">1 Prediction</option>
+                    <option value="2">2 Predictions</option>
+                    <option value="3">3 Predictions</option>
+                    <option value="4">4 Predictions</option>
+                    <option value="5">5 Predictions</option>
+                    <option value="6">6 Predictions</option>
+                    <option value="7">7 Predictions</option>
+                    <option value="8">8 Predictions</option>
+                    <option value="9">9 Predictions</option>
+                    <option value="10">10 Predictions</option>
+                    <option value="11">11 Predictions</option>
+                    <option value="12">12 Predictions</option>
+                    <option value="13">13 Predictions</option>
+                    <option value="14">14 Predictions</option>
+                    <option value="15">15 Predictions</option>
+                    <option value="16">16 Predictions</option>
+                    <option value="17">17 Predictions</option>
+                    <option value="18">18 Predictions</option>
+                    <option value="19">19 Predictions</option>
+                    <option value="20">20 Predictions</option>
+                    <option value="21">21 Predictions</option>
+                    <option value="22">22 Predictions</option>
+                    <option value="23">23 Predictions</option>
+                    <option value="24">24 Predictions</option>
+                </select>
+            </div>
+
+            <!-- Prediction button and success rate box -->
+            <div class="controls">
+                <button id="predict-button">Predict New Numbers</button>
+            </div>
+
+            <div id="success-rate-box">
+                <h3>Success Rate: </h3>
+                <p id="success-rate">0%</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Separate predicted numbers box on the right side -->
+    <div id="predicted-numbers-box">
+        <h3>Predicted Numbers</h3>
+        <ul id="predicted-numbers"></ul>
+    </div>
+
+    <script>
+        // Function to generate the grid of 25 mines
+        function createMineGrid() {
+            const container = document.getElementById("mine-grid");
+            for (let i = 1; i <= 25; i++) {
+                const mineBox = document.createElement("div");
+                mineBox.classList.add("mine-box");
+                mineBox.textContent = i;
+                mineBox.setAttribute("data-index", i); // Store the number in the data attribute
+                container.appendChild(mineBox);
+            }
+        }
+
+        // Function to get random unique predictions
+        function getRandomPredictions(predictions) {
+            const totalNumbers = 25; // Total numbers in the grid (1-25)
+            const randomNumbers = [];
+
+            while (randomNumbers.length < predictions) {
+                const randNum = Math.floor(Math.random() * totalNumbers) + 1; // Random number between 1 and 25
+                if (!randomNumbers.includes(randNum)) {
+                    randomNumbers.push(randNum);
+                }
+            }
+
+            return randomNumbers;
+        }
+
+        // Function to display the predicted numbers
+        function displayPredictions(mines, predictions) {
+            const predictionList = getRandomPredictions(predictions);
+            const predictedNumbers = document.getElementById("predicted-numbers");
+
+            predictedNumbers.innerHTML = ""; // Clear any existing predictions
+
+            predictionList.forEach(num => {
+                const predictedBox = document.createElement("li");
+                predictedBox.textContent = `Predicted: #${num}`;
+                predictedNumbers.appendChild(predictedBox);
+
+                // Highlight the corresponding box in the grid
+                const mineBox = document.querySelector(`[data-index='${num}']`);
+                if (mineBox) {
+                    mineBox.classList.add("predicted");
+                }
+            });
+
+            // Calculate success rate based on mines and predictions
+            calculateSuccessRate(mines, predictions);
+        }
+
+        // Function to reset the grid highlighting (before generating new numbers)
+        function resetGridHighlights() {
+            const allMineBoxes = document.querySelectorAll(".mine-box");
+            allMineBoxes.forEach((box) => {
+                box.classList.remove("predicted");
+            });
+        }
+
+        // Function to calculate the success rate based on selected number of mines and predictions
+        function calculateSuccessRate(mines, predictions) {
+            const totalSlots = 25; // Total number of slots in the grid
+            const safeSpots = totalSlots - mines - predictions; // Safe spots = total slots - number of mines - number of predicted spots
+            const totalAvailable = totalSlots - predictions; // Available spots for selection
+
+            // Success rate = (Safe Spots) / (Available Spots)
+            const successRate = (safeSpots / totalAvailable) * 100;
+
+            document.getElementById("success-rate").textContent = `${successRate.toFixed(2)}%`;
+        }
+
+        // Initial grid creation when the page loads
+        window.onload = function() {
+            createMineGrid();
+        }
+
+        // Event listener for the Predict New Numbers button
+        document.getElementById("predict-button").addEventListener("click", function() {
+            const mines = parseInt(document.getElementById("mines-select").value); // Get number of mines selected
+            const predictions = parseInt(document.getElementById("predictions-select").value); // Get number of predictions selected
+            resetGridHighlights();  // Reset the highlighted mines before generating new ones
+            displayPredictions(mines, predictions); // Generate and display new predictions
+        });
+    </script>
+
+</body>
+</html>
